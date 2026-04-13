@@ -3,7 +3,7 @@ from typing import Annotated, Dict, List
 from schemas import TokenSchema, AddHabitSchema, HabitIdProvidedSchema
 from uuid import uuid4
 import datetime
-from models import Users, JWTTable, Habits, HabitCompletions
+from models import Users, JWTTable, Habits, HabitCompletions, Categories
 from sqlalchemy.orm import Session
 from depends_utils import (
     get_user_depends,
@@ -17,7 +17,8 @@ from db_utils import (
     delete_completion_by_id,
     get_latest_completion,
     delete_habit_by_id,
-    construct_and_add_model_to_database
+    construct_and_add_model_to_database,
+    get_category_by_id,
 )
 from GeneratingAuthUtils.jwt_token_handling import extract_payload
 from ValidationUtils.validate_entries import validate_string, validate_reset_time
@@ -65,21 +66,38 @@ async def add_habit(
     if not validate_reset_time(habit.reset_at):
         raise HTTPException(status_code=400, detail="Invalid resetting time")
 
+    category = None
+    if habit.category_id:
+        category = await get_category_by_id(db=db, category_id=habit.category_id)
+        if not category:
+            raise HTTPException(
+                status_code=400, detail="Category not found")
+        if category.user_id != user.user_id:
+            raise HTTPException(
+                status_code=401, detail="Unauthorized. You're not owner of this category")
+
     reset_at_final = {}
     for reset_time in habit.reset_at:
         reset_at_final[reset_time] = False
 
     habit_id = str(uuid4())
 
+    habit_data = {
+        "habit_id": habit_id,
+        "habit_name": habit.habit_name,
+        "habit_desc": habit.habit_desc,
+        "user_id": user.user_id,
+        "date_created": datetime.datetime.today(),
+        "reset_at": reset_at_final,
+        "owner": user,
+    }
+    if category:
+        habit_data["category_id"] = category.category_id
+        habit_data["category"] = category
+
     construct_and_add_model_to_database(
         db=db, Model=Habits,
-        habit_id=habit_id,
-        habit_name=habit.habit_name,
-        habit_desc=habit.habit_desc,
-        user_id=user.user_id,
-        date_created=datetime.datetime.today(),
-        reset_at=reset_at_final,
-        owner=user,
+        **habit_data
     )
 
     await commit(db)

@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Request, HTTPException
 from database import engine
-from models import Base, Users, JWTTable, HabitCompletions, Habits
+from models import Base, Users, JWTTable, HabitCompletions, Habits, Categories
 from apscheduler.schedulers.background import BackgroundScheduler
 from auth_router import auth_router
 from dotenv import load_dotenv
 import os
 from habit_router import habit_router
+from category_router import category_router
 from periodic_tasks import update_jwts, reset_all_habits, reset_potential_habit
 from fastapi.middleware.cors import CORSMiddleware
 from utils_router import utils_router
@@ -51,6 +52,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(auth_router)
 app.include_router(habit_router)
 app.include_router(utils_router)
+app.include_router(category_router)
 
 
 @app.on_event("startup")

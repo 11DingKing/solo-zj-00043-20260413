@@ -13,6 +13,26 @@ class HabitSchema(BaseModel):
     date_created: str
     completed: bool
     reset_at: Dict[int, bool]
+    category_id: str | None = None
+
+
+class CategorySchema(BaseModel):
+    category_id: str
+    category_name: str
+    date_created: int
+
+
+class AddCategorySchema(BaseModel):
+    category_name: Annotated[str, Field(..., min_length=1, max_length=50)]
+
+
+class UpdateCategorySchema(BaseModel):
+    category_id: Annotated[str, Field(...)]
+    category_name: Annotated[str, Field(..., min_length=1, max_length=50)]
+
+
+class CategoryIdProvidedSchema(BaseModel):
+    category_id: Annotated[str, Field(...)]
 
 
 class HabitCompletionSchema(BaseModel):
@@ -66,6 +86,7 @@ class AddHabitSchema(BaseModel):
     habit_name: Annotated[str, Field(..., min_length=3, max_length=200)]
     habit_desc: Annotated[str, Field(..., min_length=3, max_length=500)]
     reset_at: Annotated[List[int], Field(...)]
+    category_id: Annotated[str | None, Field(default=None)]
 
 
 class HabitIdProvidedSchema(BaseModel):

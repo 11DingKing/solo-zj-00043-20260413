@@ -19,4 +19,11 @@ export const getHabitCompletionsURL = `${BASE_URL}/get_habit_completions`;
 export const getAllCompletionsURL = `${BASE_URL}/get_all_completions`;
 export const uncompleteHabitURL = `${BASE_URL}/uncomplete_habit`;
 
+// CATEGORIES
+export const addCategoryURL = `${BASE_URL}/add_category`;
+export const getCategoriesURL = `${BASE_URL}/get_categories`;
+export const updateCategoryURL = `${BASE_URL}/update_category`;
+export const deleteCategoryURL = `${BASE_URL}/delete_category`;
+export const getHabitsByCategoryURL = `${BASE_URL}/get_habits_by_category`;
+
 export const getUNIXFromMidnightURL = `${BASE_URL}/get_UNIX_from_midnight`;

@@ -1,10 +1,10 @@
 from database import session_local, engine
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import Users, HabitCompletions, Habits, JWTTable, Base
-from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound
+from models import Users, HabitCompletions, Habits, JWTTable, Base, Categories
+from sqlalchemy.exc import SQLAlchemyError, MultipleResultsFound, IntegrityError
 from fastapi import HTTPException
 from typing import Generator
-from sqlalchemy import select, delete, or_, and_
+from sqlalchemy import select, delete, or_, and_, update
 from functools import wraps
 from typing import Optional
 from sqlalchemy.orm import DeclarativeBase
@@ -188,3 +188,66 @@ async def delete_habit_by_id(db: AsyncSession, habit_id: str):
         delete(Habits)
         .where(Habits.habit_id == habit_id)
     )
+
+
+@database_error_handler(action="Get category by it's id")
+async def get_category_by_id(db: AsyncSession, category_id: str):
+    result = await db.execute(
+        select(Categories)
+        .where(Categories.category_id == category_id)
+    )
+    return result.scalars().one_or_none()
+
+
+@database_error_handler(action="Get category by name and user id")
+async def get_category_by_name_and_user(db: AsyncSession, category_name: str, user_id: str):
+    result = await db.execute(
+        select(Categories)
+        .where(and_(Categories.category_name == category_name, Categories.user_id == user_id))
+    )
+    return result.scalars().one_or_none()
+
+
+@database_error_handler(action="Get categories by user id")
+async def get_categories_by_user_id(db: AsyncSession, user_id: str):
+    result = await db.execute(
+        select(Categories)
+        .where(Categories.user_id == user_id)
+        .order_by(Categories.date_created.asc())
+    )
+    return result.scalars().all()
+
+
+@database_error_handler(action="Delete category by it's id")
+async def delete_category_by_id(db: AsyncSession, category_id: str):
+    await db.execute(
+        delete(Categories)
+        .where(Categories.category_id == category_id)
+    )
+
+
+@database_error_handler(action="Update habits category to null")
+async def update_habits_category_to_null(db: AsyncSession, category_id: str):
+    await db.execute(
+        update(Habits)
+        .where(Habits.category_id == category_id)
+        .values(category_id=None)
+    )
+
+
+@database_error_handler(action="Get habits by category id")
+async def get_habits_by_category_id(db: AsyncSession, category_id: str, user_id: str):
+    result = await db.execute(
+        select(Habits)
+        .where(and_(Habits.category_id == category_id, Habits.user_id == user_id))
+    )
+    return result.scalars().all()
+
+
+@database_error_handler(action="Get habits without category")
+async def get_habits_without_category(db: AsyncSession, user_id: str):
+    result = await db.execute(
+        select(Habits)
+        .where(and_(Habits.category_id == None, Habits.user_id == user_id))
+    )
+    return result.scalars().all()
