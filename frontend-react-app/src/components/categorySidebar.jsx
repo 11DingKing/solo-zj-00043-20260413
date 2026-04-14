@@ -23,15 +23,24 @@ const CategorySidebar = ({ selectedCategory, onCategorySelect, refreshTrigger, o
     }, [refreshTrigger]);
 
     const loadCategories = async () => {
+        if (!token) {
+            console.log("No token available, skipping category load");
+            return;
+        }
         try {
             setLoading(true);
             const response = await fetchGetCategories(token);
-            const responseJSON = await response.json();
-            const errorFlag = handleResponseError(response, responseJSON, navigate, setToken);
-            if (errorFlag) { return; };
-            setCategories(responseJSON);
+            if (!response.ok) {
+                console.error(`Failed to fetch categories: ${response.status}`);
+                const responseJSON = await response.json();
+                const errorFlag = handleResponseError(response, responseJSON, navigate, setToken);
+                if (errorFlag) { return; };
+            } else {
+                const responseJSON = await response.json();
+                setCategories(responseJSON);
+            }
         } catch (err) {
-            console.error(err);
+            console.error("Error loading categories:", err);
         } finally {
             setLoading(false);
         }
