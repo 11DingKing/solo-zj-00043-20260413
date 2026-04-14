@@ -4,7 +4,7 @@ COPY . /back_app
 
 WORKDIR /back_app
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
 
 EXPOSE 8000
 

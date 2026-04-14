@@ -4,7 +4,7 @@ COPY . /front_app
 
 WORKDIR /front_app
 
-RUN npm install
+RUN npm install --registry=https://registry.npmmirror.com
 
 EXPOSE 3000
 
