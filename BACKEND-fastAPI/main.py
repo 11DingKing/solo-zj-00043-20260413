@@ -10,6 +10,7 @@ from category_router import category_router
 from periodic_tasks import update_jwts, reset_all_habits, reset_potential_habit
 from fastapi.middleware.cors import CORSMiddleware
 from utils_router import utils_router
+from migrations import check_and_migrate_database
 import time
 from typing import Any
 import hashlib
@@ -57,6 +58,7 @@ app.include_router(category_router)
 
 @app.on_event("startup")
 async def startup_init_models():
+    await check_and_migrate_database()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
