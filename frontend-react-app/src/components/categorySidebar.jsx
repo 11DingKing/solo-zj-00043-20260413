@@ -108,9 +108,9 @@ const CategorySidebar = ({ selectedCategory, onCategorySelect, refreshTrigger, o
 
         try {
             const response = await fetchDeleteCategory(category.category_id, token);
-            const responseJSON = await response.json();
             
             if (!response.ok) {
+                const responseJSON = await response.json();
                 handleResponseError(response, responseJSON, navigate, setToken, setErrorMessage);
                 return;
             }

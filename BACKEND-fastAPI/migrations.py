@@ -31,6 +31,11 @@ async def check_and_migrate_database():
                 sync_conn.execute(text("CREATE INDEX ix_categories_category_name ON categories (category_name)"))
                 logger.info("Categories table created successfully")
             
+            if "habits" not in tables:
+                logger.info("habits table does not exist yet, skipping column migration")
+                sync_conn.commit()
+                return
+
             columns = [col["name"] for col in inspector.get_columns("habits")]
             logger.info(f"Existing columns in habits table: {columns}")
             
